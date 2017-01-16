@@ -36,7 +36,8 @@ public class ImageViewerPanel extends JPanel implements ActionListener {
 	File selectedFile;
 	JLabel imageLabel;
 	static ImageIcon image;
-
+	private static int counter = 0;
+	public static ArrayList<String> resultList = new ArrayList<String>(256);
 	// konfiguracja Layoutu
 	BorderLayout buttonConstraints = new BorderLayout();
 
@@ -70,7 +71,7 @@ public class ImageViewerPanel extends JPanel implements ActionListener {
 		add(NextButton, buttonConstraints.LINE_END);
 		add(PreviousButton, buttonConstraints.LINE_START);
 		add(jMenuBar, buttonConstraints.PAGE_START);
-//		 add(imageLabel, buttonConstraints.CENTER);
+		// add(imageLabel, buttonConstraints.CENTER);
 	}
 
 	class ImageComponent extends JComponent {
@@ -98,16 +99,18 @@ public class ImageViewerPanel extends JPanel implements ActionListener {
 
 		}
 	}
+
 	public void displayerOfImages(ImageIcon image) {
-		JLabel imageLabel = new JLabel(image);	
+		JLabel imageLabel = new JLabel(image);
 		add(imageLabel, buttonConstraints.CENTER);
-		
+
 	}
+
 	public static ArrayList<String> getAllImages(File directory, boolean descendIntoSubDirectories) throws IOException {
-		ArrayList<String> resultList = new ArrayList<String>(256);
 		File[] f = directory.listFiles();
 		for (File file : f) {
-			if (file != null && file.getName().toLowerCase().endsWith(".jpg") || file.getName().toLowerCase().endsWith(".png") && !file.getName().startsWith("tn_")) {
+			if (file != null && file.getName().toLowerCase().endsWith(".jpg")
+					|| file.getName().toLowerCase().endsWith(".png") && !file.getName().startsWith("tn_")) {
 				resultList.add(file.getCanonicalPath());
 			}
 			if (descendIntoSubDirectories && file.isDirectory()) {
@@ -118,10 +121,12 @@ public class ImageViewerPanel extends JPanel implements ActionListener {
 			}
 		}
 		// zamieniam ArrayListe na Stringa
-		String listString []  = resultList.toArray(new String[resultList.size()]);
+		String listString[] = resultList.toArray(new String[resultList.size()]);
 		if (resultList.size() > 0) {
+
 			System.out.println(resultList.get(0));
-			image = new ImageIcon(resultList.get(0));	
+			image = new ImageIcon(resultList.get(0));
+
 			return resultList;
 		} else {
 			System.out.println(resultList);
@@ -139,9 +144,9 @@ public class ImageViewerPanel extends JPanel implements ActionListener {
 			if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
 				selectedFile = chooser.getSelectedFile();
 				System.out.println(selectedFile);
-				
+
 				System.out.println(selectedFile.getName().toLowerCase());
-				
+
 				try {
 					getAllImages(selectedFile, true);
 				} catch (IOException e1) {
@@ -150,8 +155,31 @@ public class ImageViewerPanel extends JPanel implements ActionListener {
 				}
 				imageLabel = new JLabel(image);
 				add(imageLabel, buttonConstraints.CENTER);
+				updateUI();
 			}
 
+		}
+		if (e.getActionCommand().equals("Next >")) {
+			counter += 1;
+			if (counter >= resultList.size()) {
+				counter = 0;
+			}
+			ImageIcon image2 = new ImageIcon(resultList.get(counter));
+
+			System.out.println(resultList.get(counter));
+
+			imageLabel.setIcon(image2);
+			imageLabel.repaint();
+			updateUI();
+		} else if (e.getActionCommand().equals("< Prev")) {
+			counter -= 1;
+			if (counter < 0) {
+				counter = resultList.size() - 1;
+			}
+			ImageIcon image3 = new ImageIcon(resultList.get(counter));
+			imageLabel.setIcon(image3);
+			imageLabel.repaint();
+			updateUI();
 		}
 	}
 
